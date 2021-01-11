@@ -1,0 +1,14 @@
+.marginTop {
+  margin-top: 1rem;
+}
+
+.noPadding {
+  padding: 0px;
+}
+
+@media only screen and (min-width: 768px) {
+  .rtlDirection {
+    display: flex;
+    flex-direction: row-reverse;
+  }
+}
