@@ -16,30 +16,36 @@ import "./Calculator.css";
 import { Formik, Form } from "formik";
 
 const Calculator = () => {
-  const [data, setData] = useState({ hits: [] });
+  const [data, setData] = useState({
+    weight: "",
+    height: "",
+    sex: "true",
+    calories: "",
+    age: "",
+  });
 
   useEffect(() => {
+    const userId = localStorage.getItem("userId");
     const fetchData = async () => {
-      const result = fetch(
-        "/api/users/112/details/",
-        {
-          method: "GET",
-          // headers: { "Content-Type": "application/json" },
-        }
-      )
+      fetch(`/api/users/${userId}/details/`, {
+        method: "GET",
+      })
         .then((res) => res.json())
         .then((json) => {
-          console.log(
-            "🚀 ~ file: Calculator.js ~ line 30 ~ .then ~ json",
-            json
-          );
-
-          setData(json);
+          const preparedData = { ...json, sex: String(json.sex) };
+          setData(preparedData);
         });
     };
 
     fetchData();
   }, []);
+
+  const formData = {
+    weight: data.weight || "",
+    height: data.height || "",
+    sex: data.sex || "",
+    age: data.age || "",
+  };
 
   const sendData = (values) => {
     console.log(
@@ -72,105 +78,122 @@ const Calculator = () => {
             <CCardHeader>Kalkulator kaloryczności</CCardHeader>
             <CCardBody>
               <Formik
-                initialValues={{
-                  height: "",
-                  weight: "",
-                  age: "",
-                  sex: "",
-                }}
+                initialValues={formData}
+                enableReinitialize={true}
                 onSubmit={sendData}
               >
-                {({ values, handleChange }) => (
-                  <Form>
-                    <CRow>
-                      <CCol xs="12" md="6">
-                        <CFormGroup>
-                          <CLabel htmlFor="weight">Masa</CLabel>
-                          <CInput
-                            id="weight"
-                            name="weight"
-                            placeholder="Wprowadź masę"
-                            type="number"
-                            required
-                            onChange={handleChange}
-                          />
-                        </CFormGroup>
-                      </CCol>
-                      <CCol xs="12" md="6">
-                        <CFormGroup>
-                          <CLabel htmlFor="height">Wzrost</CLabel>
-                          <CInput
-                            id="height"
-                            name="height"
-                            placeholder="Wprowadź wzrost"
-                            type="number"
-                            required
-                            onChange={handleChange}
-                          />
-                        </CFormGroup>
-                      </CCol>
-                      <CCol xs="12" md="6">
-                        <CFormGroup>
-                          <CLabel htmlFor="age">Wiek</CLabel>
-                          <CInput
-                            id="age"
-                            name="age"
-                            placeholder="Wprowadź wiek"
-                            type="number"
-                            required
-                            onChange={handleChange}
-                          />
-                        </CFormGroup>
-                      </CCol>
-                      <CCol xs="6">
-                        <div>
-                          <CLabel>Płeć</CLabel>
-                        </div>
-                        <div>
-                          <CFormGroup variant="custom-radio" inline>
-                            <CInputRadio
-                              custom
-                              id="inline-radio1"
-                              name="sex"
-                              value={true}
-                              onChange={handleChange}
+                {({ values, setFieldValue }) => {
+                  console.log(
+                    "🚀 ~ file: Calculator.js ~ line 83 ~ Calculator ~ values",
+                    values
+                  );
+                  return (
+                    <Form>
+                      <CRow>
+                        <CCol xs="12" md="6">
+                          <CFormGroup>
+                            <CLabel htmlFor="weight">Masa</CLabel>
+                            <CInput
+                              id="weight"
+                              name="weight"
+                              placeholder="Wprowadź masę"
+                              type="number"
+                              value={values.weight}
+                              required
+                              onChange={({ target }) =>
+                                setFieldValue("weight", target.value)
+                              }
                             />
-                            <CLabel
-                              variant="custom-checkbox"
-                              htmlFor="inline-radio1"
-                            >
-                              Mężczyzna
-                            </CLabel>
                           </CFormGroup>
-                          <CFormGroup variant="custom-radio" inline>
-                            <CInputRadio
-                              custom
-                              id="inline-radio2"
-                              name="sex"
-                              value={false}
-                              onChange={handleChange}
+                        </CCol>
+                        <CCol xs="12" md="6">
+                          <CFormGroup>
+                            <CLabel htmlFor="height">Wzrost</CLabel>
+                            <CInput
+                              id="height"
+                              name="height"
+                              placeholder="Wprowadź wzrost"
+                              type="number"
+                              value={values.height}
+                              required
+                              onChange={({ target }) =>
+                                setFieldValue("height", target.value)
+                              }
                             />
-                            <CLabel
-                              variant="custom-checkbox"
-                              htmlFor="inline-radio2"
-                            >
-                              Kobieta
-                            </CLabel>
                           </CFormGroup>
-                        </div>
-                      </CCol>
-                    </CRow>
-                    <CRow className="marginTop">
-                      <CCol xs="12 noPadding">
-                        <CFormGroup className="form-actions">
-                          <CButton type="submit" size="sm" color="success">
-                            Zapisz
-                          </CButton>
-                        </CFormGroup>
-                      </CCol>
-                    </CRow>
-                  </Form>
-                )}
+                        </CCol>
+                        <CCol xs="12" md="6">
+                          <CFormGroup>
+                            <CLabel htmlFor="age">Wiek</CLabel>
+                            <CInput
+                              id="age"
+                              name="age"
+                              placeholder="Wprowadź wiek"
+                              type="number"
+                              value={values.age}
+                              required
+                              onChange={({ target }) =>
+                                setFieldValue("age", target.value)
+                              }
+                            />
+                          </CFormGroup>
+                        </CCol>
+                        <CCol xs="6">
+                          <div>
+                            <CLabel>Płeć</CLabel>
+                          </div>
+                          <div>
+                            <CFormGroup variant="custom-radio" inline>
+                              <CInputRadio
+                                custom
+                                id="inline-radio1"
+                                name="sex"
+                                value="true"
+                                checked={values.sex === "true"}
+                                onChange={({ target }) =>
+                                  setFieldValue("sex", target.value)
+                                }
+                              />
+                              <CLabel
+                                variant="custom-checkbox"
+                                htmlFor="inline-radio1"
+                              >
+                                Mężczyzna
+                              </CLabel>
+                            </CFormGroup>
+                            <CFormGroup variant="custom-radio" inline>
+                              <CInputRadio
+                                custom
+                                id="inline-radio2"
+                                name="sex"
+                                value="false"
+                                checked={values.sex === "false"}
+                                onChange={({ target }) =>
+                                  setFieldValue("sex", target.value)
+                                }
+                              />
+                              <CLabel
+                                variant="custom-checkbox"
+                                htmlFor="inline-radio2"
+                              >
+                                Kobieta
+                              </CLabel>
+                            </CFormGroup>
+                          </div>
+                        </CCol>
+                      </CRow>
+                      <CRow className="marginTop">
+                        <CCol xs="12 noPadding">
+                          <CFormGroup className="form-actions">
+                            <CButton type="submit" size="sm" color="success">
+                              Zapisz
+                            </CButton>
+                          </CFormGroup>
+                        </CCol>
+                      </CRow>
+                    </Form>
+                  );
+                }}
               </Formik>
             </CCardBody>
           </CCard>
@@ -178,7 +201,7 @@ const Calculator = () => {
             <CCardBody>
               <CJumbotron className="border">
                 <div>
-                  <CLabel htmlFor="weight">Masa</CLabel>
+                  <CLabel htmlFor="weight">Kalorie {data.calories}</CLabel>
                 </div>
                 <div>{}</div>
               </CJumbotron>
