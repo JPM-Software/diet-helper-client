@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
 import {
   CButton,
   CCard,
@@ -15,7 +14,7 @@ import {
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
 import { Formik, Form } from "formik";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 
 const Login = () => {
   const formData = {
@@ -124,7 +123,7 @@ const Login = () => {
                               <CButton
                                 type="submit"
                                 color="primary"
-                                className="px-4"
+                                block
                               >
                                 Zaloguj się
                               </CButton>
@@ -149,7 +148,7 @@ const Login = () => {
                     </p>
                     <Link to="/register">
                       <CButton
-                        color="primary"
+                        color="success"
                         className="mt-3"
                         active
                         tabIndex={-1}
