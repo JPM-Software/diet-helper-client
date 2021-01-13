@@ -1,21 +1,64 @@
-import React from 'react'
+import React, { useEffect } from "react";
 import {
   CButton,
   CCard,
   CCardBody,
-  CCardFooter,
   CCol,
   CContainer,
-  CForm,
   CInput,
   CInputGroup,
   CInputGroupPrepend,
   CInputGroupText,
-  CRow
-} from '@coreui/react'
-import CIcon from '@coreui/icons-react'
+  CRow,
+} from "@coreui/react";
+import CIcon from "@coreui/icons-react";
+import { useHistory } from "react-router-dom";
+import { Form, Formik } from "formik";
 
 const Register = () => {
+  const formData = {
+    login: "",
+    password: "",
+  };
+
+  const history = useHistory();
+
+  useEffect(() => {
+    const loggedInUser = localStorage.getItem("userId");
+    if (loggedInUser) {
+      history.push("/");
+    }
+  }, [history]);
+
+  const sendData = (values) => {
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(values),
+    };
+
+    fetch(`/api/users/`, requestOptions)
+      .then((res) => res.json())
+      .then((json) => {
+        console.log("🚀 ~ file: Login.js ~ line 37 ~ .then ~ json", json);
+
+        handleResponse(json);
+      })
+      .catch((error) => {
+        console.error("Error: ", error);
+      });
+  };
+
+  const handleResponse = (data) => {
+    if (!data.message) {
+      history.push("/login");
+    } else {
+      //toast ze nie istnieje juz takie konto
+    }
+  };
+
   return (
     <div className="c-app c-default-layout flex-row align-items-center">
       <CContainer>
@@ -23,58 +66,62 @@ const Register = () => {
           <CCol md="9" lg="7" xl="6">
             <CCard className="mx-4">
               <CCardBody className="p-4">
-                <CForm>
-                  <h1>Register</h1>
-                  <p className="text-muted">Create your account</p>
-                  <CInputGroup className="mb-3">
-                    <CInputGroupPrepend>
-                      <CInputGroupText>
-                        <CIcon name="cil-user" />
-                      </CInputGroupText>
-                    </CInputGroupPrepend>
-                    <CInput type="text" placeholder="Username" autoComplete="username" />
-                  </CInputGroup>
-                  <CInputGroup className="mb-3">
-                    <CInputGroupPrepend>
-                      <CInputGroupText>@</CInputGroupText>
-                    </CInputGroupPrepend>
-                    <CInput type="text" placeholder="Email" autoComplete="email" />
-                  </CInputGroup>
-                  <CInputGroup className="mb-3">
-                    <CInputGroupPrepend>
-                      <CInputGroupText>
-                        <CIcon name="cil-lock-locked" />
-                      </CInputGroupText>
-                    </CInputGroupPrepend>
-                    <CInput type="password" placeholder="Password" autoComplete="new-password" />
-                  </CInputGroup>
-                  <CInputGroup className="mb-4">
-                    <CInputGroupPrepend>
-                      <CInputGroupText>
-                        <CIcon name="cil-lock-locked" />
-                      </CInputGroupText>
-                    </CInputGroupPrepend>
-                    <CInput type="password" placeholder="Repeat password" autoComplete="new-password" />
-                  </CInputGroup>
-                  <CButton color="success" block>Create Account</CButton>
-                </CForm>
+                <Formik initialValues={formData} onSubmit={sendData}>
+                  {({ setFieldValue }) => {
+                    return (
+                      <Form>
+                        <h1>Rejestracja</h1>
+                        <p className="text-muted">Utwórz swoje konto</p>
+                        <CInputGroup className="mb-3">
+                          <CInputGroupPrepend>
+                            <CInputGroupText>
+                              <CIcon name="cil-user" />
+                            </CInputGroupText>
+                          </CInputGroupPrepend>
+                          <CInput
+                            id="login"
+                            name="login"
+                            type="text"
+                            placeholder="Nazwa"
+                            autoComplete="username"
+                            required
+                            onChange={({ target }) =>
+                              setFieldValue("login", target.value)
+                            }
+                          />
+                        </CInputGroup>
+                        <CInputGroup className="mb-3">
+                          <CInputGroupPrepend>
+                            <CInputGroupText>
+                              <CIcon name="cil-lock-locked" />
+                            </CInputGroupText>
+                          </CInputGroupPrepend>
+                          <CInput
+                            id="password"
+                            name="password"
+                            type="password"
+                            placeholder="Hasło"
+                            autoComplete="new-password"
+                            required
+                            onChange={({ target }) =>
+                              setFieldValue("password", target.value)
+                            }
+                          />
+                        </CInputGroup>
+                        <CButton type="submit" color="success" block>
+                          Utwórz konto
+                        </CButton>
+                      </Form>
+                    );
+                  }}
+                </Formik>
               </CCardBody>
-              <CCardFooter className="p-4">
-                <CRow>
-                  <CCol xs="12" sm="6">
-                    <CButton className="btn-facebook mb-1" block><span>facebook</span></CButton>
-                  </CCol>
-                  <CCol xs="12" sm="6">
-                    <CButton className="btn-twitter mb-1" block><span>twitter</span></CButton>
-                  </CCol>
-                </CRow>
-              </CCardFooter>
             </CCard>
           </CCol>
         </CRow>
       </CContainer>
     </div>
-  )
-}
+  );
+};
 
-export default Register
+export default Register;
