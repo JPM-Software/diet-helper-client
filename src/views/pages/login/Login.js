@@ -1,5 +1,4 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect } from "react";
 import {
   CButton,
   CCard,
@@ -7,16 +6,66 @@ import {
   CCardGroup,
   CCol,
   CContainer,
-  CForm,
   CInput,
   CInputGroup,
   CInputGroupPrepend,
   CInputGroupText,
-  CRow
-} from '@coreui/react'
-import CIcon from '@coreui/icons-react'
+  CRow,
+} from "@coreui/react";
+import CIcon from "@coreui/icons-react";
+import { Formik, Form } from "formik";
+import { useHistory, Link } from "react-router-dom";
 
 const Login = () => {
+  const formData = {
+    login: "",
+    password: "",
+  };
+
+  const history = useHistory();
+
+  useEffect(() => {
+    const loggedInUser = localStorage.getItem("userId");
+    if (loggedInUser) {
+      history.push("/");
+    }
+  }, [history]);
+
+  const sendData = (values) => {
+    console.log(
+      "🚀 ~ file: Calculator.js ~ line 21 ~ sendData ~ values",
+      values
+    );
+
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(values),
+    };
+
+    fetch(`/api/users/login/`, requestOptions)
+      .then((res) => res.json())
+      .then((json) => {
+        console.log("🚀 ~ file: Login.js ~ line 37 ~ .then ~ json", json);
+
+        handleResponse(json);
+      })
+      .catch((error) => {
+        console.error("Error: ", error);
+      });
+  };
+
+  const handleResponse = (data) => {
+    if (data.id) {
+      localStorage.setItem("userId", data.id);
+      history.push("/");
+    } else {
+      // toast z wiadomoscia data.message
+    }
+  };
+
   return (
     <div className="c-app c-default-layout flex-row align-items-center">
       <CContainer>
@@ -25,44 +74,87 @@ const Login = () => {
             <CCardGroup>
               <CCard className="p-4">
                 <CCardBody>
-                  <CForm>
-                    <h1>Login</h1>
-                    <p className="text-muted">Sign In to your account</p>
-                    <CInputGroup className="mb-3">
-                      <CInputGroupPrepend>
-                        <CInputGroupText>
-                          <CIcon name="cil-user" />
-                        </CInputGroupText>
-                      </CInputGroupPrepend>
-                      <CInput type="text" placeholder="Username" autoComplete="username" />
-                    </CInputGroup>
-                    <CInputGroup className="mb-4">
-                      <CInputGroupPrepend>
-                        <CInputGroupText>
-                          <CIcon name="cil-lock-locked" />
-                        </CInputGroupText>
-                      </CInputGroupPrepend>
-                      <CInput type="password" placeholder="Password" autoComplete="current-password" />
-                    </CInputGroup>
-                    <CRow>
-                      <CCol xs="6">
-                        <CButton color="primary" className="px-4">Login</CButton>
-                      </CCol>
-                      <CCol xs="6" className="text-right">
-                        <CButton color="link" className="px-0">Forgot password?</CButton>
-                      </CCol>
-                    </CRow>
-                  </CForm>
+                  <Formik initialValues={formData} onSubmit={sendData}>
+                    {({ setFieldValue }) => {
+                      return (
+                        <Form>
+                          <h1>Logowanie</h1>
+                          <p className="text-muted">
+                            Zaloguj się do swojego konta
+                          </p>
+                          <CInputGroup className="mb-3">
+                            <CInputGroupPrepend>
+                              <CInputGroupText>
+                                <CIcon name="cil-user" />
+                              </CInputGroupText>
+                            </CInputGroupPrepend>
+                            <CInput
+                              id="login"
+                              name="login"
+                              type="text"
+                              placeholder="Nazwa"
+                              autoComplete="username"
+                              required
+                              onChange={({ target }) =>
+                                setFieldValue("login", target.value)
+                              }
+                            />
+                          </CInputGroup>
+                          <CInputGroup className="mb-4">
+                            <CInputGroupPrepend>
+                              <CInputGroupText>
+                                <CIcon name="cil-lock-locked" />
+                              </CInputGroupText>
+                            </CInputGroupPrepend>
+                            <CInput
+                              id="password"
+                              name="password"
+                              type="password"
+                              placeholder="Hasło"
+                              autoComplete="current-password"
+                              required
+                              onChange={({ target }) =>
+                                setFieldValue("password", target.value)
+                              }
+                            />
+                          </CInputGroup>
+                          <CRow>
+                            <CCol xs="12">
+                              <CButton
+                                type="submit"
+                                color="primary"
+                                block
+                              >
+                                Zaloguj się
+                              </CButton>
+                            </CCol>
+                          </CRow>
+                        </Form>
+                      );
+                    }}
+                  </Formik>
                 </CCardBody>
               </CCard>
-              <CCard className="text-white bg-primary py-5 d-md-down-none" style={{ width: '44%' }}>
+              <CCard
+                className="text-white bg-gradient-info py-5 d-md-down-none"
+                style={{ width: "44%" }}
+              >
                 <CCardBody className="text-center">
                   <div>
-                    <h2>Sign up</h2>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut
-                      labore et dolore magna aliqua.</p>
+                    <h2>Rejestracja</h2>
+                    <p>
+                      Utwórz swoje konto poznaj swój stan fizyczny. Zdecyduj o
+                      swojej diecie i zapisuj swoje dzienne spożycie.
+                    </p>
                     <Link to="/register">
-                      <CButton color="primary" className="mt-3" active tabIndex={-1}>Register Now!</CButton>
+                      <CButton
+                        color="success"
+                        className="mt-3"
+                        active
+                        tabIndex={-1}
+                      >
+                        Zarejestruj się!
+                      </CButton>
                     </Link>
                   </div>
                 </CCardBody>
@@ -72,7 +164,7 @@ const Login = () => {
         </CRow>
       </CContainer>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
