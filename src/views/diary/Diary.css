@@ -1,0 +1,13 @@
+.diaryDate {
+  font-size: large;
+}
+
+.caption {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.captionCard {
+  margin-bottom: 0px;
+}
