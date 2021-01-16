@@ -32,11 +32,6 @@ const Login = () => {
   }, [history]);
 
   const sendData = (values) => {
-    console.log(
-      "🚀 ~ file: Calculator.js ~ line 21 ~ sendData ~ values",
-      values
-    );
-
     const requestOptions = {
       method: "POST",
       headers: {

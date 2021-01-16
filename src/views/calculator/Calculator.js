@@ -16,16 +16,31 @@ import "./Calculator.css";
 import { Formik, Form } from "formik";
 
 const Calculator = () => {
+  const maleCoefficent = 5;
+  const femaleCoefficent = -161;
+  const userId = localStorage.getItem("userId");
+
+  const [BMI, setBMI] = useState("");
   const [data, setData] = useState({
     weight: "",
     height: "",
     sex: "true",
-    calories: "",
+    calories: 0,
     age: "",
+    dietTarget: "",
+    user: "",
   });
 
+  const formData = {
+    weight: data.weight || "",
+    height: data.height || "",
+    sex: data.sex || "",
+    age: data.age || "",
+    dietTarget: data.dietTarget,
+    user: data.user,
+  };
+
   useEffect(() => {
-    const userId = localStorage.getItem("userId");
     const fetchData = async () => {
       fetch(`/api/users/${userId}/details/`, {
         method: "GET",
@@ -34,25 +49,81 @@ const Calculator = () => {
         .then((json) => {
           const preparedData = { ...json, sex: String(json.sex) };
           setData(preparedData);
+          const bmi = calculateBMI(preparedData);
+          setBMI(bmi);
         });
     };
 
     fetchData();
-  }, []);
-
-  const formData = {
-    weight: data.weight || "",
-    height: data.height || "",
-    sex: data.sex || "",
-    age: data.age || "",
-  };
+  }, [userId]);
 
   const sendData = (values) => {
-    console.log(
-      "🚀 ~ file: Calculator.js ~ line 21 ~ sendData ~ values",
-      values
-    );
+    const valuesToSend = prepareValues(values);
+    if (Object.keys(valuesToSend).length === 0) {
+      return;
+    }
+    const requestOptions = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(valuesToSend),
+    };
+
+    fetch(`/api/users/${userId}/details/`, requestOptions)
+      .then((res) => res.json())
+      .then((json) => {
+        const preparedData = { ...json, sex: String(json.sex) };
+        setData(preparedData);
+        const bmi = calculateBMI(preparedData);
+        setBMI(bmi);
+      })
+      .catch((error) => {
+        console.error("Error: ", error);
+      });
   };
+
+  const prepareValues = (data) => {
+    if (
+      !data.sex ||
+      !data.age ||
+      !data.weight ||
+      !data.height ||
+      !data.dietTarget
+    ) {
+      return {};
+    }
+
+    data.calories =
+      data.sex === "true"
+        ? calculateBMRForSetTarget(data, maleCoefficent)
+        : calculateBMRForSetTarget(data, femaleCoefficent);
+    return data;
+  };
+
+  const calculateBMRForSetTarget = (data, sexCoefficient) => {
+    let BMR =
+      10 * data.weight + 6.25 * data.height - 5 * data.age + sexCoefficient;
+
+    switch (data.dietTarget) {
+      case "STAY":
+        return parseInt(BMR, 10);
+      case "REDUCE":
+        return parseInt(BMR * 0.8, 10);
+      case "GAIN":
+        return parseInt(BMR * 1.2, 10);
+      default:
+        break;
+    }
+  };
+
+  const calculateBMI = (data) => {
+    const heightInMeters = data?.height / 100;
+    const bmi = data?.weight / (heightInMeters * heightInMeters);
+    const reducedBMI = bmi.toFixed(2);
+    return reducedBMI || 0;
+  };
+
   return (
     <>
       <CRow className="rtlDirection">
@@ -83,10 +154,6 @@ const Calculator = () => {
                 onSubmit={sendData}
               >
                 {({ values, setFieldValue }) => {
-                  console.log(
-                    "🚀 ~ file: Calculator.js ~ line 83 ~ Calculator ~ values",
-                    values
-                  );
                   return (
                     <Form>
                       <CRow>
@@ -146,9 +213,10 @@ const Calculator = () => {
                             <CFormGroup variant="custom-radio" inline>
                               <CInputRadio
                                 custom
-                                id="inline-radio1"
+                                id="sex-radio1"
                                 name="sex"
                                 value="true"
+                                required
                                 checked={values.sex === "true"}
                                 onChange={({ target }) =>
                                   setFieldValue("sex", target.value)
@@ -156,7 +224,7 @@ const Calculator = () => {
                               />
                               <CLabel
                                 variant="custom-checkbox"
-                                htmlFor="inline-radio1"
+                                htmlFor="sex-radio1"
                               >
                                 Mężczyzna
                               </CLabel>
@@ -164,7 +232,7 @@ const Calculator = () => {
                             <CFormGroup variant="custom-radio" inline>
                               <CInputRadio
                                 custom
-                                id="inline-radio2"
+                                id="sex-radio2"
                                 name="sex"
                                 value="false"
                                 checked={values.sex === "false"}
@@ -174,16 +242,78 @@ const Calculator = () => {
                               />
                               <CLabel
                                 variant="custom-checkbox"
-                                htmlFor="inline-radio2"
+                                htmlFor="sex-radio2"
                               >
                                 Kobieta
                               </CLabel>
                             </CFormGroup>
                           </div>
                         </CCol>
+                        <CCol xs="12">
+                          <div>
+                            <CLabel>Wybierz swój cel</CLabel>
+                          </div>
+                          <div>
+                            <CFormGroup variant="custom-radio" inline>
+                              <CInputRadio
+                                custom
+                                required
+                                id="dietTarget-radio1"
+                                name="dietTarget"
+                                value="REDUCE"
+                                checked={values.dietTarget === "REDUCE"}
+                                onChange={({ target }) =>
+                                  setFieldValue("dietTarget", target.value)
+                                }
+                              />
+                              <CLabel
+                                variant="custom-checkbox"
+                                htmlFor="dietTarget-radio1"
+                              >
+                                Zmniejsz masę
+                              </CLabel>
+                            </CFormGroup>
+                            <CFormGroup variant="custom-radio" inline>
+                              <CInputRadio
+                                custom
+                                id="dietTarget-radio2"
+                                name="dietTarget"
+                                value="STAY"
+                                checked={values.dietTarget === "STAY"}
+                                onChange={({ target }) =>
+                                  setFieldValue("dietTarget", target.value)
+                                }
+                              />
+                              <CLabel
+                                variant="custom-checkbox"
+                                htmlFor="dietTarget-radio2"
+                              >
+                                Utrzymaj mase
+                              </CLabel>
+                            </CFormGroup>
+                            <CFormGroup variant="custom-radio" inline>
+                              <CInputRadio
+                                custom
+                                id="dietTarget-radio3"
+                                name="dietTarget"
+                                value="GAIN"
+                                checked={values.dietTarget === "GAIN"}
+                                onChange={({ target }) =>
+                                  setFieldValue("dietTarget", target.value)
+                                }
+                              />
+                              <CLabel
+                                variant="custom-checkbox"
+                                htmlFor="dietTarget-radio3"
+                              >
+                                Przybierz masę
+                              </CLabel>
+                            </CFormGroup>
+                          </div>
+                        </CCol>
                       </CRow>
                       <CRow className="marginTop">
-                        <CCol xs="12 noPadding">
+                        <CCol xs="12">
                           <CFormGroup className="form-actions">
                             <CButton type="submit" size="sm" color="success">
                               Zapisz
@@ -200,10 +330,24 @@ const Calculator = () => {
           <CCard>
             <CCardBody>
               <CJumbotron className="border">
-                <div>
-                  <CLabel htmlFor="weight">Kalorie {data.calories}</CLabel>
-                </div>
-                <div>{}</div>
+                {data.calories > 0 && (
+                  <div>
+                    <h1 className="display-7">Twoje cele:</h1>
+                    <p className="lead">
+                      Twoje BMI wynosi {BMI}. Aby uzyskać wybrany cel zalecamy
+                      spożywać {data.calories} kalorii dziennie.
+                    </p>
+                  </div>
+                )}
+                {data.calories === 0 && (
+                  <div>
+                    <h1 className="display-7">Najpierw oblicz dane</h1>
+                    <p className="lead">
+                      Aby wyznaczyć swoje cele prosimy użyć kalkulatora
+                      znajdującego się powyżej.
+                    </p>
+                  </div>
+                )}
               </CJumbotron>
             </CCardBody>
           </CCard>
