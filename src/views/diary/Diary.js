@@ -44,7 +44,7 @@ const Diary = () => {
   };
 
   const loadUserData = async () => {
-    fetch(`/api/users/${userId}/details/`, {
+    fetch(`https://diet-helper-api-app.herokuapp.com/api/users/${userId}/details/`, {
       method: "GET",
     })
       .then((res) => res.json())
@@ -55,7 +55,7 @@ const Diary = () => {
   };
 
   const loadTodaysDiary = async () => {
-    fetch(`/api/diaries/by-user/${userId}/today/`, {
+    fetch(`https://diet-helper-api-app.herokuapp.com/api/diaries/by-user/${userId}/today/`, {
       method: "GET",
     })
       .then((res) => res.json())
@@ -83,7 +83,7 @@ const Diary = () => {
   }, [userId]);
 
   const deleteFood = (foodId) => {
-    fetch(`/api/diaries/foods/${foodId}`, {
+    fetch(`https://diet-helper-api-app.herokuapp.com/api/diaries/foods/${foodId}`, {
       method: "DELETE",
     })
       .then((res) => res.json())
@@ -104,7 +104,7 @@ const Diary = () => {
       body: JSON.stringify(food),
     };
 
-    fetch(`/api/diaries/foods/`, requestOptions)
+    fetch(`https://diet-helper-api-app.herokuapp.com/api/diaries/foods/`, requestOptions)
       .then((res) => res.json())
       .then((json) => {
         saveFoodToDiary(json.id);
@@ -134,7 +134,7 @@ const Diary = () => {
       body: JSON.stringify(diaryData),
     };
 
-    fetch(`/api/diaries/${diaryId}`, requestOptions)
+    fetch(`https://diet-helper-api-app.herokuapp.com/api/diaries/${diaryId}`, requestOptions)
       .then((res) => res.json())
       .then(() => {
         loadTodaysDiary();

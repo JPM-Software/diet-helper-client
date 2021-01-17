@@ -42,7 +42,7 @@ const Calculator = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      fetch(`/api/users/${userId}/details/`, {
+      fetch(`https://diet-helper-api-app.herokuapp.com/api/users/${userId}/details/`, {
         method: "GET",
       })
         .then((res) => res.json())
@@ -70,7 +70,7 @@ const Calculator = () => {
       body: JSON.stringify(valuesToSend),
     };
 
-    fetch(`/api/users/${userId}/details/`, requestOptions)
+    fetch(`https://diet-helper-api-app.herokuapp.com/api/users/${userId}/details/`, requestOptions)
       .then((res) => res.json())
       .then((json) => {
         const preparedData = { ...json, sex: String(json.sex) };

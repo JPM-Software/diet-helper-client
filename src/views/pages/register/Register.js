@@ -40,11 +40,9 @@ const Register = () => {
       body: JSON.stringify(values),
     };
 
-    fetch(`/api/users/`, requestOptions)
+    fetch(`https://diet-helper-api-app.herokuapp.com/api/users/`, requestOptions)
       .then((res) => res.json())
       .then((json) => {
-        console.log("🚀 ~ file: Login.js ~ line 37 ~ .then ~ json", json);
-
         handleResponse(json);
       })
       .catch((error) => {
