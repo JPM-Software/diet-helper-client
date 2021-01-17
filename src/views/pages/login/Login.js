@@ -40,7 +40,7 @@ const Login = () => {
       body: values,
     };
 
-    fetch(`/api/users/login/`, requestOptions)
+    fetch(`https://diet-helper-api-app.herokuapp.com/api/users/login/`, requestOptions)
       .then((res) => res.json())
       .then((json) => {
         console.log("🚀 ~ file: Login.js ~ line 37 ~ .then ~ json", json);
