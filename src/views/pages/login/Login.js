@@ -37,7 +37,7 @@ const Login = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(values),
+      body: values,
     };
 
     fetch(`/api/users/login/`, requestOptions)
