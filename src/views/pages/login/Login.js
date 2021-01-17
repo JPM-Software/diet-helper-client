@@ -37,13 +37,13 @@ const Login = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: values,
+      body: JSON.stringify(values),
     };
 
     fetch(`https://diet-helper-api-app.herokuapp.com/api/users/login/`, requestOptions)
       .then((res) => res.json())
       .then((json) => {
-        handleResponse(JSON.stringify(json));
+        handleResponse(json);
       })
       .catch((error) => {
         console.error("Error: ", error);
